@@ -11,24 +11,19 @@ class PDFParser:
 	delta = 30
 	font = 'p'
 
-	def __init__(self, file_name):
-		# self.file_name = input('File Name:')
-		# if self.file_name == '':
-		# self.file_name = 'input'
+	def __init__(self, file_name):		
 		self.file_name = file_name
-		self.directory = self.file_name
+		self.directory = 'uploads/'+self.file_name.replace('.pdf', '').replace('.PDF', '')
 		if not os.path.isdir(self.directory):
 			os.makedirs(self.directory)
 		if not os.path.isdir(f'{self.directory}/images'):
 			os.makedirs(f'{self.directory}/images')
 		self.parse_content()
 
-	# parse pdf content
 	def parse_content(self):
 		try:
-			pdb.set_trace()
-			py_pdf = PyPDF2.PdfFileReader(open(f'{self.file_name}.pdf', 'rb'))
-			pdf = pdfplumber.open(f'{self.file_name}.pdf')
+			py_pdf = PyPDF2.PdfFileReader(open(f'uploads/{self.file_name}', 'rb'))
+			pdf = pdfplumber.open(f'uploads/{self.file_name}')
 			self.file_name = self.file_name.replace(' ', '_')
 			page_length = len(pdf.pages)
 			for idx in range(0, page_length):
