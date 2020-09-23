@@ -16,17 +16,17 @@ class PDFParser:
 		self.directory = 'uploads/'+self.file_name.replace('.pdf', '').replace('.PDF', '')
 		if not os.path.isdir(self.directory):
 			os.makedirs(self.directory)
-		if not os.path.isdir(self.directory+'/images'):
-			os.makedirs(self.directory+'/images')
+		if not os.path.isdir(f'{self.directory}/images'):
+			os.makedirs(f'{self.directory}/images')
 		self.parse_content()
 
 	def parse_content(self):
 		try:
-			py_pdf = PyPDF2.PdfFileReader(open('uploads/'+self.file_name, 'rb'))
-			pdf = pdfplumber.open('uploads/'+self.file_name)
+			py_pdf = PyPDF2.PdfFileReader(open(f'uploads/{self.file_name}', 'rb'))
+			pdf = pdfplumber.open(f'uploads/{self.file_name}')
 			self.file_name = self.file_name.replace(' ', '_')
 			page_length = len(pdf.pages)
-			for idx in range(0, page_length):			
+			for idx in range(0, page_length):
 				items = []
 				try:
 					page_content = py_pdf.getPage(idx).extractText().encode('ascii','ignore').decode('utf-8-sig')
@@ -118,10 +118,10 @@ class PDFParser:
 		for idx, a_word in enumerate(all_words):
 			if a_word['text'] == word:				
 				try:
-					sub_sentence = all_words[idx-1]["text"] + ' ' + word
+					sub_sentence = f'{all_words[idx-1]["text"]} {word}'
 					if title:
 						# sub_sentence = f'{all_words[idx-2]["text"]} {all_words[idx-1]["text"]} {word}'
-						sub_sentence = ' ' + all_words[idx-1]["text"] + ' ' + word
+						sub_sentence = f' {all_words[idx-1]["text"]} {word}'
 					if sub_sentence in sentence:
 						self.all_words.pop(idx)
 						return a_word
@@ -166,11 +166,11 @@ class PDFParser:
 
 	def save_image(self, image):
 		image_bbox = (image['x0'], self.page_height - image['y1'], image['x1'], self.page_height - image['y0'])
-		image_name = 'images/'+self.file_name+'_'+str(self.image_index)+'.'+self.extension_type
+		image_name = f'images/{self.file_name}_{self.image_index}.{self.extension_type}'
 		cropped_page = self.page.crop(image_bbox)
 		image_obj = cropped_page.to_image(resolution=self.resolution)
 		# if not os.path.exists(image_name):
-		image_obj.save(self.directory+'/'+image_name)
+		image_obj.save(f'{self.directory}/{image_name}')
 		width = image['x1'] - image['x0']
 		full = False
 		self.image_index += 1
@@ -180,11 +180,11 @@ class PDFParser:
 		}
 
 	def save_as_html(self, items, idx):
-		with open(self.directory+'/'+self.file_name+'_'+str(idx)+'.html', mode='w', encoding='utf-8-sig') as output:
+		with open(f'{self.directory}/{self.file_name}_{idx}.html', mode='w', encoding='utf-8-sig') as output:
 			begins = [
 				'<html>',
 				'<head>'
-				'<title>'+self.file_name+'</title>',
+				f'<title>{self.file_name}</title>',
 				'</head>',
 				'<body style="display: flex; font-family: arial">',
 				'<div style="width: 60%;margin: auto; display: flex; flex-direction: column;">',
@@ -206,16 +206,16 @@ class PDFParser:
 		rets = []
 		for word in words:
 			if 'http://'in word or 'https://' in word:
-				word = '<a href="'+word+'" target="blank">'+word+'</a>'
+				word = f'<a href="{word}" target="blank">{word}</a>'
 			rets.append(word)
 		rets = ' '.join(rets)
 		if item['tag'] == 'img':
-			if item['full']:				
-				line = '<'+item["tag"]+' src='+rets+' style="margin: 5px auto; width: 100%"/>'
-			else:				
-				line = '<'+item["tag"]+' src='+rets+' style="margin: 5px auto; max-width: 100%"/>'
-		else:			
-			line = '<'+item["tag"]+'>'+rets+'</'+item["tag"]+'>'
+			if item['full']:
+				line = f'<{item["tag"]} src={rets} style="margin: 5px auto; width: 100%"/>'
+			else:
+				line = f'<{item["tag"]} src={rets} style="margin: 5px auto; max-width: 100%"/>'
+		else:
+			line = f'<{item["tag"]}>{rets}</{item["tag"]}>'		
 		line += '\n'
 		return line
 
